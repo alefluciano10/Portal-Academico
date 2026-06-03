@@ -27,97 +27,76 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let confirmCallback = null;
 
-    const mostrarModal = ({ tipo, titulo, mensagem, mostrarCancelar = false, confirmarTexto = "OK", cancelarTexto = "Cancelar", onConfirm = null }) => {
-        const modal = document.getElementById("modalOverlay");
-        const modalContent = document.querySelector(".modal-content");
-        const icon = document.getElementById("modalIcon");
-        const tituloEl = document.getElementById("modalTitulo");
-        const mensagemEl = document.getElementById("modalMensagem");
-        const botaoOk = document.getElementById("botaoOk");
-        const botaoCancelar = document.getElementById("botaoCancelar");
+    const mostrarModal = ({
+    titulo,
+    mensagem,
+    confirmarTexto = "OK",
+    cancelarTexto = "Cancelar",
+    onConfirm = null
+}) => {
 
-        if (modalContent) {
-            modalContent.classList.remove("modal-sucesso", "modal-confirmacao", "modal-erro");
-        }
+    const modal = document.getElementById("modalOverlay");
+    const tituloEl = document.getElementById("modalTitulo");
+    const mensagemEl = document.getElementById("modalMensagem");
+    const botaoOk = document.getElementById("botaoOk");
+    const botaoCancelar = document.getElementById("botaoCancelar");
 
-        if (tipo === "sucesso") {
-            icon.textContent = "✓";
-            icon.style.color = "#10b981";
-            if (modalContent) modalContent.classList.add("modal-sucesso");
-        } else if (tipo === "confirmacao") {
-            icon.textContent = "?";
-            icon.style.color = "#f59e0b";
-            if (modalContent) modalContent.classList.add("modal-confirmacao");
-        } else {
-            icon.textContent = "✕";
-            icon.style.color = "#ef4444";
-            if (modalContent) modalContent.classList.add("modal-erro");
-        }
+    tituloEl.textContent = titulo;
+    mensagemEl.textContent = mensagem;
 
-        tituloEl.textContent = titulo;
-        mensagemEl.textContent = mensagem;
-        botaoOk.textContent = confirmarTexto;
-        confirmCallback = onConfirm;
+    botaoOk.textContent = confirmarTexto;
+    botaoCancelar.textContent = cancelarTexto;
 
-        if (botaoCancelar) {
-            botaoCancelar.textContent = cancelarTexto;
-            botaoCancelar.style.display = mostrarCancelar ? "inline-block" : "none";
-        }
+    confirmCallback = onConfirm;
 
-        console.log("[modal] abrir:", tipo, titulo, mensagem);
-        modal.classList.remove("hidden");
-        modal.focus();
+    modal.classList.remove("hidden");
+    modal.focus();
 
-        const keyHandler = (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        };
+    const fecharModal = () => {
+        modal.classList.add("hidden");
+        confirmCallback = null;
 
-        modal.addEventListener('keydown', keyHandler);
+        const nomeEl = document.getElementById("nome");
 
-        const fecharModal = () => {
-            modal.classList.add("hidden");
-            modal.removeEventListener('keydown', keyHandler);
-            confirmCallback = null;
-            console.log('[modal] fechado pelo usuário');
-            const nomeEl = document.getElementById("nome");
-            if (nomeEl) nomeEl.focus();
-        };
-
-        botaoOk.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const callback = confirmCallback;
-            fecharModal();
-            if (callback) {
-                callback();
-            }
-        };
-
-        if (botaoCancelar) {
-            botaoCancelar.onclick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                fecharModal();
-            };
+        if (
+            nomeEl &&
+            !cadastroSection.classList.contains("hidden")
+        ) {
+            nomeEl.focus();
         }
     };
+
+    botaoOk.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const callback = confirmCallback;
+
+        fecharModal();
+
+        if (callback) {
+            callback();
+        }
+    };
+
+    botaoCancelar.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        fecharModal();
+    };
+};
 
     const mostrarNotificacao = (tipo, titulo, mensagem) => {
         mostrarModal({ tipo, titulo, mensagem, mostrarCancelar: false, confirmarTexto: "OK" });
     };
 
     const confirmarExclusao = (indice, linha, nomeAluno) => {
-        mostrarModal({
-            tipo: "confirmacao",
-            titulo: "Excluir aluno",
-            mensagem: `Deseja remover ${nomeAluno} da lista? Esta ação não pode ser desfeita.`,
-            mostrarCancelar: true,
-            confirmarTexto: "Excluir",
-            cancelarTexto: "Cancelar",
-            onConfirm: () => {
+                mostrarModal({
+                    titulo: "Excluir aluno",
+                    mensagem: `Deseja remover ${nomeAluno} da lista? Esta ação não pode ser desfeita.`,
+                    confirmarTexto: "Excluir",
+                    cancelarTexto: "Cancelar",
+                    onConfirm: () => {
                 alunos.splice(indice, 1);
                 if (linha.parentNode) {
                     linha.parentNode.removeChild(linha);
@@ -310,12 +289,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         mostrarModal({
-            tipo: "confirmacao",
-            titulo: "Cadastrar aluno",
-            mensagem: `Tem certeza que deseja cadastrar ${novoAluno.nome}?`,
-            mostrarCancelar: true,
-            confirmarTexto: "Cadastrar",
-            cancelarTexto: "Cancelar",
+                titulo: "Cadastrar aluno",
+                mensagem: `Tem certeza que deseja cadastrar ${novoAluno.nome}?`,
+                confirmarTexto: "Cadastrar",
+                cancelarTexto: "Cancelar",
             onConfirm: () => {
                 alunos.push(novoAluno);
                 salvarAlunos();
