@@ -1,33 +1,89 @@
+/*
+    JS principal do Portal Acadêmico Web
+
+    Responsabilidades deste arquivo:
+    - Carregar dados de alunos do servidor (`/api/alunos`) ou do localStorage quando offline
+    - Expor funções para montar a tabela dinâmica usando DOM (createElement/appendChild/innerText)
+    - Controlar a UI: alternância de seções (menu lateral), formulário de cadastro e modal de confirmação
+    - Enviar atualizações para o servidor (`/api/salvar-alunos`) e manter um backup no localStorage
+
+    IDs importantes usados no HTML:
+    - `formCadastro`, `cadastroSection`, `inicioSection`, `tabelaSection`, `corpoTabela`, `modalOverlay`
+
+    Observação de segurança: o código chama a API `http://localhost:3000/api` para gravação do JSON.
+    Em ambiente de produção, proteger endpoints e validar dados no servidor.
+*/
 // Executa o script somente quando a página estiver totalmente carregada
 document.addEventListener("DOMContentLoaded", () => {
-    // Elemento tbody onde as linhas da tabela serão inseridas
     const tabelaBody = document.getElementById("corpoTabela");
+    const formCadastro = document.getElementById("formCadastro");
+    const cadastroSection = document.getElementById("cadastroSection");
+    const inicioSection = document.getElementById("inicioSection");
+    const tabelaSection = document.getElementById("tabelaSection");
+    const menuLinks = document.querySelectorAll(".side-bar-menu a");
+    const apiUrl = "http://localhost:3000/api";
+    const storageKey = "alunosCadastro";
 
-    // Caminho do arquivo JSON com os dados dos alunos
-    const dadosUrl = "../JSON/alunos.json";
+    const mostrarNotificacao = (tipo, titulo, mensagem) => {
+        const modal = document.getElementById("modalOverlay");
+        const icon = document.getElementById("modalIcon");
+        const tituloEl = document.getElementById("modalTitulo");
+        const mensagemEl = document.getElementById("modalMensagem");
+        const botaoOk = document.getElementById("botaoOk");
+        icon.textContent = tipo === "sucesso" ? "✓" : "✕";
+        icon.style.color = tipo === "sucesso" ? "#10b981" : "#ef4444";
+        tituloEl.textContent = titulo;
+        mensagemEl.textContent = mensagem;
 
-    // Calcula a média entre nota1 e nota2
-    const calcularMedia = (nota1, nota2) => {
-        return ((nota1 + nota2) / 2).toFixed(1);
+        console.log("[modal] abrir:", tipo, titulo, mensagem);
+        modal.classList.remove("hidden");
+
+        // Impede que Enter feche o modal acidentalmente
+        const keyHandler = (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        };
+        modal.addEventListener('keydown', keyHandler);
+
+        // Fecha apenas quando o usuário clicar em OK
+        botaoOk.onclick = () => {
+            modal.classList.add("hidden");
+            modal.removeEventListener('keydown', keyHandler);
+            console.log('[modal] fechado pelo usuário');
+            const nomeEl = document.getElementById("nome");
+            if (nomeEl) nomeEl.focus();
+        };
     };
 
-    // Define a situação do aluno com base na média
+    const calcularMedia = (nota1, nota2) => {
+        // Trata notas ausentes (undefined, null ou string vazia)
+        if (nota1 == null || nota2 == null || nota1 === "" || nota2 === "") {
+            return "-";
+        }
+        const n1 = Number(nota1);
+        const n2 = Number(nota2);
+        if (isNaN(n1) || isNaN(n2)) return "-";
+        return ((n1 + n2) / 2).toFixed(1);
+    };
+
     const calcularSituacao = (nota1, nota2) => {
-        const media = (nota1 + nota2) / 2;
+        if (nota1 == null || nota2 == null || nota1 === "" || nota2 === "") {
+            return "-";
+        }
+        const media = (Number(nota1) + Number(nota2)) / 2;
         return media >= 6 ? "Aprovado" : "Reprovado";
     };
 
-    // Cria uma célula <td> com o texto fornecido
     const criarCelula = (texto) => {
         const td = document.createElement("td");
         td.innerText = texto;
         return td;
     };
 
-    // Cria uma linha <tr> para um aluno específico
     const criarLinhaAluno = (aluno) => {
         const tr = document.createElement("tr");
-
         const media = calcularMedia(aluno.nota1, aluno.nota2);
         const situacao = calcularSituacao(aluno.nota1, aluno.nota2);
 
@@ -40,33 +96,146 @@ document.addEventListener("DOMContentLoaded", () => {
         return tr;
     };
 
-    // Preenche a tabela com todos os alunos carregados do JSON
+    const limparTabela = () => {
+        tabelaBody.innerHTML = "";
+    };
+
     const carregarTabela = (alunos) => {
+        limparTabela();
         alunos.forEach((aluno) => {
-            const linha = criarLinhaAluno(aluno);
-            tabelaBody.appendChild(linha);
+            tabelaBody.appendChild(criarLinhaAluno(aluno));
         });
     };
 
-    // Busca os dados do arquivo JSON e chama a função para montar a tabela
-    fetch(dadosUrl)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error("Não foi possível carregar o arquivo JSON.");
-            }
-            return response.json();
+    // Persiste a lista de alunos localmente e tenta enviar ao servidor.
+    // - Guarda em localStorage para permitir funcionamento offline.
+    // - POST para `/api/salvar-alunos` tenta atualizar o arquivo JSON no servidor.
+    // Nota: a chamada ao servidor é otimista; erros são apenas logados (fallback localStorage).
+    const salvarAlunos = () => {
+        localStorage.setItem(storageKey, JSON.stringify(alunos));
+        
+        // Salvar também no servidor (assíncrono). Não bloqueamos a UI caso falhe.
+        fetch(`${apiUrl}/salvar-alunos`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(alunos),
         })
-        .then((alunos) => {
-            carregarTabela(alunos);
+        .then((res) => {
+            if (!res.ok) {
+                console.warn('Servidor respondeu com erro ao salvar alunos', res.status);
+            }
+            return res.json().catch(() => ({}));
         })
         .catch((erro) => {
-            // Exibe mensagem de erro na tabela caso a leitura falhe
-            const tr = document.createElement("tr");
-            const td = document.createElement("td");
-            td.setAttribute("colspan", "5");
-            td.innerText = "Erro ao carregar os dados dos alunos.";
-            tr.appendChild(td);
-            tabelaBody.appendChild(tr);
-            console.error(erro);
+            // Em caso de falha de rede ou servidor, deixamos os dados no localStorage
+            console.warn("Não foi possível salvar no servidor:", erro);
         });
+    };
+
+    const carregarAlunosStorage = () => {
+        const dados = localStorage.getItem(storageKey);
+        return dados ? JSON.parse(dados) : null;
+    };
+
+    const mostrarSecao = (secao) => {
+        const activeClass = "active";
+        menuLinks.forEach((link) => {
+            if (link.dataset.target === secao) {
+                link.classList.add(activeClass);
+            } else {
+                link.classList.remove(activeClass);
+            }
+        });
+
+        if (secao === "cadastro") {
+            cadastroSection.classList.remove("hidden");
+            inicioSection.classList.add("hidden");
+            tabelaSection.classList.add("hidden");
+        } else {
+            cadastroSection.classList.add("hidden");
+            inicioSection.classList.remove("hidden");
+            tabelaSection.classList.remove("hidden");
+        }
+    };
+
+    menuLinks.forEach((link) => {
+        link.addEventListener("click", (event) => {
+            event.preventDefault();
+            const target = link.dataset.target;
+            if (target === "cadastro") {
+                mostrarSecao("cadastro");
+            } else {
+                mostrarSecao("inicio");
+            }
+        });
+    });
+
+    // Carrega dados iniciais ao abrir a página
+    // 1) Tenta buscar do servidor (`/api/alunos`) — modo preferencial
+    // 2) Se o servidor não responder (offline), carrega do `localStorage` como fallback
+    // 3) Atualiza a tabela na UI chamando `carregarTabela`
+    const carregarDadosIniciais = () => {
+        const alunosSalvos = carregarAlunosStorage();
+
+        fetch(`${apiUrl}/alunos`)
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Não foi possível carregar do servidor.");
+                }
+                return response.json();
+            })
+            .then((dados) => {
+                // Dados obtidos do servidor: atualiza array local e persiste em localStorage
+                alunos = dados;
+                salvarAlunos();
+                carregarTabela(alunos);
+            })
+            .catch((erro) => {
+                // Quando o servidor está offline, recuperamos o estado previamente salvo
+                console.warn("Servidor offline, carregando do localStorage:", erro);
+                if (alunosSalvos && alunosSalvos.length > 0) {
+                    alunos = alunosSalvos;
+                    carregarTabela(alunos);
+                } else {
+                    const tr = document.createElement("tr");
+                    const td = document.createElement("td");
+                    td.setAttribute("colspan", "5");
+                    td.innerText = "Erro ao carregar os dados. Certifique-se de que o servidor está rodando.";
+                    tr.appendChild(td);
+                    tabelaBody.appendChild(tr);
+                }
+            });
+    };
+
+    formCadastro.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(formCadastro);
+        const novoAluno = {
+            nome: formData.get("nome").trim(),
+            curso: formData.get("curso").trim(),
+            semestre: Number(formData.get("semestre")),
+            dataNascimento: formData.get("dataNascimento"),
+        };
+
+        // Validação
+        if (!novoAluno.nome || !novoAluno.curso || !novoAluno.dataNascimento) {
+            mostrarNotificacao("erro", "Erro", "Por favor, preencha todos os campos obrigatórios!");
+            return;
+        }
+
+        alunos.push(novoAluno);
+        salvarAlunos();
+        carregarTabela(alunos);
+
+        mostrarNotificacao("sucesso", "Sucesso!", `${novoAluno.nome} cadastrado com sucesso!`);
+
+        formCadastro.reset();
+        document.getElementById("nome").focus();
+    });
+
+    carregarDadosIniciais();
+    mostrarSecao("inicio");
 });

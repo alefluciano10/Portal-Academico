@@ -1,4 +1,14 @@
 <!DOCTYPE html>
+<!--
+    Portal Acadêmico Web - HTML
+    Estrutura:
+    - <aside class="side-bar">: Menu lateral com links que alternam seções via atributo data-target
+    - <main class="content">: Conteúdo principal com seções: início, cadastro e tabela
+    - Modal: diálogo central usado para confirmar ações (só fecha com OK)
+    Observações:
+    - Os links do menu não navegam entre páginas; controlam visibilidade de seções via JS
+    - IDs importantes usados pelo JavaScript: formCadastro, cadastroSection, inicioSection, tabelaSection, corpoTabela, modalOverlay
+-->
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -18,6 +28,11 @@
 <div class="container">
 
     <!-- MENU LATERAL -->
+    <!--
+        SIDEBAR: navegacão lateral do sistema.
+        Cada link possui o atributo `data-target` que indica qual seção mostrar
+        (ex.: data-target="cadastro" abre a seção de cadastro).
+    -->
     <aside class="side-bar">
 
         <div class="logo">
@@ -26,25 +41,30 @@
 
         <nav class="side-bar-menu">
             <ul>
-                <li><a href="#">Início</a></li>
-                <li><a href="#">Cadastro de Alunos</a></li>
-                <li><a href="#">Notas</a></li>
-                <li><a href="#">Relatórios</a></li>
-                <li><a href="#">Sobre</a></li>
+                <li><a href="#" class="active" data-target="inicio">Início</a></li>
+                <li><a href="#" data-target="cadastro">Cadastro de Alunos</a></li>
+                <li><a href="#" data-target="notas">Notas</a></li>
+                <li><a href="#" data-target="relatorios">Relatórios</a></li>
+                <li><a href="#" data-target="sobre">Sobre</a></li>
             </ul>
         </nav>
 
     </aside>
 
-    <!-- CONTEÚDO PRINCIPAL -->
+     <!-- CONTEÚDO PRINCIPAL
+            Contém o cabeçalho, a seção de boas-vindas, o formulário de cadastro
+            e a tabela dinâmica. Apenas uma ou duas seções ficam visíveis por vez.
+     -->
  <main class="content">
 
     <header class="header">
-        <h1>Portal Acadêmico Web</h1>
+        <div class="header-top">
+            <h1>Portal Acadêmico Web</h1>
+        </div>
         <p>Sistema de Gerenciamento Acadêmico</p>
     </header>
 
-    <section class="welcome-card">
+    <section class="welcome-card" id="inicioSection">
         <h2>Bem-vindo!</h2>
         <p>
             Este sistema permite o gerenciamento de alunos,
@@ -53,7 +73,43 @@
         </p>
     </section>
 
-    <section class="table-card">
+    <!--
+        SEÇÃO DE CADASTRO: formulário para adicionar alunos.
+        - `id="cadastroSection"` é usado para mostrar/ocultar a seção via JS
+        - Campos: nome, curso, semestre, data de nascimento
+        - O formulário não contém campos de nota; notas são lançadas em outra etapa
+    -->
+    <section class="form-card hidden" id="cadastroSection">
+        <h2>Cadastro de Alunos</h2>
+        <form id="formCadastro">
+            <div class="form-group">
+                <label for="nome">Nome</label>
+                <input type="text" id="nome" name="nome" required>
+            </div>
+            <div class="form-group">
+                <label for="curso">Curso</label>
+                <input type="text" id="curso" name="curso" required>
+            </div>
+            <div class="form-group">
+                <label for="semestre">Semestre</label>
+                <input type="number" id="semestre" name="semestre" min="1" max="12" required>
+            </div>
+            <div class="form-group">
+                <label for="dataNascimento">Data de Nascimento</label>
+                <input type="date" id="dataNascimento" name="dataNascimento" required>
+            </div>
+            
+            <button type="submit" class="btn-primary">Cadastrar Aluno</button>
+        </form>
+    </section>
+
+    <!--
+        TABELA DINÂMICA: mostra os alunos carregados do servidor/localStorage.
+        - `id="corpoTabela"` é o <tbody> onde linhas são inseridas dinamicamente
+        - Colunas: Nome, Curso, Semestre, Média, Situação
+        - As colunas de média/situação são calculadas em tempo de execução
+    -->
+    <section class="table-card" id="tabelaSection">
         <h2>Alunos Cadastrados</h2>
 
         <table id="tabelaAlunos">
@@ -72,6 +128,20 @@
     </section>
 
 </main>
+</div>
+
+<!--
+    MODAL DE CONFIRMAÇÃO
+    - `modalOverlay` é um overlay central que mostra mensagens de sucesso/erro
+    - Só pode ser fechado pelo usuário clicando em OK (comportamento definido em JS)
+-->
+<div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div id="modalIcon" class="modal-icon"></div>
+        <h2 id="modalTitulo"></h2>
+        <p id="modalMensagem"></p>
+        <button id="botaoOk" class="btn-ok">OK</button>
+    </div>
 </div>
 
 <script src="JS/script.js"></script>
