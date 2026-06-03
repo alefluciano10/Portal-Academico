@@ -290,6 +290,21 @@ transform: translateY(-1px);
 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.btn-editar{
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.btn-editar:hover{
+    background: #1e40af;
+    transform: translateY(-1px);
+}
+
 .btn-excluir{
 background: #dc2626;
 color: white;

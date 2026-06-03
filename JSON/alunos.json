@@ -1,1 +1,8 @@
-[]
+[
+    {
+        "nome": "Alef Luciano",
+        "curso": "ADMINISTRAÇÃO",
+        "semestre": 5,
+        "dataNascimento": "2003-12-09"
+    }
+]

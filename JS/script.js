@@ -25,6 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const storageKey = "alunosCadastro";
     let alunos = [];
 
+    let indiceEdicao = null;
+    const botaoSubmit = formCadastro.querySelector(".btn-primary");
+
     let confirmCallback = null;
 
     const mostrarModal = ({
@@ -134,6 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const criarLinhaAluno = (aluno, indice) => {
         const tr = document.createElement("tr");
+
         const media = calcularMedia(aluno.nota1, aluno.nota2);
         const situacao = calcularSituacao(aluno.nota1, aluno.nota2);
 
@@ -144,16 +148,43 @@ document.addEventListener("DOMContentLoaded", () => {
         tr.appendChild(criarCelula(situacao));
 
         const tdAcao = document.createElement("td");
+
+        // BOTÃO EDITAR
+        const botaoEditar = document.createElement("button");
+        botaoEditar.type = "button";
+        botaoEditar.innerText = "Editar";
+        botaoEditar.className = "btn-editar";
+
+        botaoEditar.addEventListener("click", () => {
+
+            document.getElementById("nome").value = aluno.nome;
+            document.getElementById("curso").value = aluno.curso;
+            document.getElementById("semestre").value = aluno.semestre;
+            document.getElementById("dataNascimento").value =
+                aluno.dataNascimento;
+
+            indiceEdicao = indice;
+
+            botaoSubmit.textContent = "Salvar Alteração";
+
+            mostrarSecao("cadastro");
+
+            document.getElementById("nome").focus();
+        });
+
+        // BOTÃO EXCLUIR
         const botaoExcluir = document.createElement("button");
         botaoExcluir.type = "button";
         botaoExcluir.innerText = "Excluir";
         botaoExcluir.className = "btn-excluir";
-        botaoExcluir.dataset.indice = indice;
+
         botaoExcluir.addEventListener("click", () => {
             confirmarExclusao(indice, tr, aluno.nome);
         });
 
+        tdAcao.appendChild(botaoEditar);
         tdAcao.appendChild(botaoExcluir);
+
         tr.appendChild(tdAcao);
 
         return tr;
@@ -276,6 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
 
         const formData = new FormData(formCadastro);
+
         const novoAluno = {
             nome: formData.get("nome").trim(),
             curso: formData.get("curso").trim(),
@@ -283,23 +315,53 @@ document.addEventListener("DOMContentLoaded", () => {
             dataNascimento: formData.get("dataNascimento"),
         };
 
-        // Validação
-        if (!novoAluno.nome || !novoAluno.curso || !novoAluno.dataNascimento) {
+        if (
+            !novoAluno.nome ||
+            !novoAluno.curso ||
+            !novoAluno.dataNascimento
+        ) {
             return;
         }
 
+        // ALTERAÇÃO
+        if (indiceEdicao !== null) {
+
+            alunos[indiceEdicao] = {
+                ...alunos[indiceEdicao],
+                ...novoAluno
+            };
+
+            salvarAlunos();
+            carregarTabela(alunos);
+
+            indiceEdicao = null;
+
+            formCadastro.reset();
+
+            botaoSubmit.textContent = "Cadastrar Aluno";
+
+            mostrarSecao("inicio");
+
+            return;
+        }
+
+        // CADASTRO
         mostrarModal({
-                titulo: "Cadastrar aluno",
-                mensagem: `Tem certeza que deseja cadastrar ${novoAluno.nome}?`,
-                confirmarTexto: "Cadastrar",
-                cancelarTexto: "Cancelar",
+            titulo: "Cadastrar aluno",
+            mensagem: `Tem certeza que deseja cadastrar ${novoAluno.nome}?`,
+            confirmarTexto: "Cadastrar",
+            cancelarTexto: "Cancelar",
+
             onConfirm: () => {
                 alunos.push(novoAluno);
+
                 salvarAlunos();
                 carregarTabela(alunos);
+
                 formCadastro.reset();
+
                 document.getElementById("nome").focus();
-            },
+            }
         });
     });
 
