@@ -23,38 +23,109 @@ document.addEventListener("DOMContentLoaded", () => {
     const menuLinks = document.querySelectorAll(".side-bar-menu a");
     const apiUrl = "http://localhost:3000/api";
     const storageKey = "alunosCadastro";
+    let alunos = [];
 
-    const mostrarNotificacao = (tipo, titulo, mensagem) => {
+    let confirmCallback = null;
+
+    const mostrarModal = ({ tipo, titulo, mensagem, mostrarCancelar = false, confirmarTexto = "OK", cancelarTexto = "Cancelar", onConfirm = null }) => {
         const modal = document.getElementById("modalOverlay");
+        const modalContent = document.querySelector(".modal-content");
         const icon = document.getElementById("modalIcon");
         const tituloEl = document.getElementById("modalTitulo");
         const mensagemEl = document.getElementById("modalMensagem");
         const botaoOk = document.getElementById("botaoOk");
-        icon.textContent = tipo === "sucesso" ? "✓" : "✕";
-        icon.style.color = tipo === "sucesso" ? "#10b981" : "#ef4444";
+        const botaoCancelar = document.getElementById("botaoCancelar");
+
+        if (modalContent) {
+            modalContent.classList.remove("modal-sucesso", "modal-confirmacao", "modal-erro");
+        }
+
+        if (tipo === "sucesso") {
+            icon.textContent = "✓";
+            icon.style.color = "#10b981";
+            if (modalContent) modalContent.classList.add("modal-sucesso");
+        } else if (tipo === "confirmacao") {
+            icon.textContent = "?";
+            icon.style.color = "#f59e0b";
+            if (modalContent) modalContent.classList.add("modal-confirmacao");
+        } else {
+            icon.textContent = "✕";
+            icon.style.color = "#ef4444";
+            if (modalContent) modalContent.classList.add("modal-erro");
+        }
+
         tituloEl.textContent = titulo;
         mensagemEl.textContent = mensagem;
+        botaoOk.textContent = confirmarTexto;
+        confirmCallback = onConfirm;
+
+        if (botaoCancelar) {
+            botaoCancelar.textContent = cancelarTexto;
+            botaoCancelar.style.display = mostrarCancelar ? "inline-block" : "none";
+        }
 
         console.log("[modal] abrir:", tipo, titulo, mensagem);
         modal.classList.remove("hidden");
+        modal.focus();
 
-        // Impede que Enter feche o modal acidentalmente
         const keyHandler = (e) => {
             if (e.key === "Enter") {
                 e.preventDefault();
                 e.stopPropagation();
             }
         };
+
         modal.addEventListener('keydown', keyHandler);
 
-        // Fecha apenas quando o usuário clicar em OK
-        botaoOk.onclick = () => {
+        const fecharModal = () => {
             modal.classList.add("hidden");
             modal.removeEventListener('keydown', keyHandler);
+            confirmCallback = null;
             console.log('[modal] fechado pelo usuário');
             const nomeEl = document.getElementById("nome");
             if (nomeEl) nomeEl.focus();
         };
+
+        botaoOk.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const callback = confirmCallback;
+            fecharModal();
+            if (callback) {
+                callback();
+            }
+        };
+
+        if (botaoCancelar) {
+            botaoCancelar.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                fecharModal();
+            };
+        }
+    };
+
+    const mostrarNotificacao = (tipo, titulo, mensagem) => {
+        mostrarModal({ tipo, titulo, mensagem, mostrarCancelar: false, confirmarTexto: "OK" });
+    };
+
+    const confirmarExclusao = (indice, linha, nomeAluno) => {
+        mostrarModal({
+            tipo: "confirmacao",
+            titulo: "Excluir aluno",
+            mensagem: `Deseja remover ${nomeAluno} da lista? Esta ação não pode ser desfeita.`,
+            mostrarCancelar: true,
+            confirmarTexto: "Excluir",
+            cancelarTexto: "Cancelar",
+            onConfirm: () => {
+                alunos.splice(indice, 1);
+                if (linha.parentNode) {
+                    linha.parentNode.removeChild(linha);
+                }
+                salvarAlunos();
+                carregarTabela(alunos);
+            },
+        });
     };
 
     const calcularMedia = (nota1, nota2) => {
@@ -82,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return td;
     };
 
-    const criarLinhaAluno = (aluno) => {
+    const criarLinhaAluno = (aluno, indice) => {
         const tr = document.createElement("tr");
         const media = calcularMedia(aluno.nota1, aluno.nota2);
         const situacao = calcularSituacao(aluno.nota1, aluno.nota2);
@@ -93,6 +164,19 @@ document.addEventListener("DOMContentLoaded", () => {
         tr.appendChild(criarCelula(media));
         tr.appendChild(criarCelula(situacao));
 
+        const tdAcao = document.createElement("td");
+        const botaoExcluir = document.createElement("button");
+        botaoExcluir.type = "button";
+        botaoExcluir.innerText = "Excluir";
+        botaoExcluir.className = "btn-excluir";
+        botaoExcluir.dataset.indice = indice;
+        botaoExcluir.addEventListener("click", () => {
+            confirmarExclusao(indice, tr, aluno.nome);
+        });
+
+        tdAcao.appendChild(botaoExcluir);
+        tr.appendChild(tdAcao);
+
         return tr;
     };
 
@@ -102,8 +186,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const carregarTabela = (alunos) => {
         limparTabela();
-        alunos.forEach((aluno) => {
-            tabelaBody.appendChild(criarLinhaAluno(aluno));
+        alunos.forEach((aluno, indice) => {
+            tabelaBody.appendChild(criarLinhaAluno(aluno, indice));
         });
     };
 
@@ -201,7 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     const tr = document.createElement("tr");
                     const td = document.createElement("td");
-                    td.setAttribute("colspan", "5");
+                    td.setAttribute("colspan", "6");
                     td.innerText = "Erro ao carregar os dados. Certifique-se de que o servidor está rodando.";
                     tr.appendChild(td);
                     tabelaBody.appendChild(tr);
@@ -222,18 +306,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Validação
         if (!novoAluno.nome || !novoAluno.curso || !novoAluno.dataNascimento) {
-            mostrarNotificacao("erro", "Erro", "Por favor, preencha todos os campos obrigatórios!");
             return;
         }
 
-        alunos.push(novoAluno);
-        salvarAlunos();
-        carregarTabela(alunos);
-
-        mostrarNotificacao("sucesso", "Sucesso!", `${novoAluno.nome} cadastrado com sucesso!`);
-
-        formCadastro.reset();
-        document.getElementById("nome").focus();
+        mostrarModal({
+            tipo: "confirmacao",
+            titulo: "Cadastrar aluno",
+            mensagem: `Tem certeza que deseja cadastrar ${novoAluno.nome}?`,
+            mostrarCancelar: true,
+            confirmarTexto: "Cadastrar",
+            cancelarTexto: "Cancelar",
+            onConfirm: () => {
+                alunos.push(novoAluno);
+                salvarAlunos();
+                carregarTabela(alunos);
+                formCadastro.reset();
+                document.getElementById("nome").focus();
+            },
+        });
     });
 
     carregarDadosIniciais();

@@ -120,6 +120,7 @@
                     <th>Semestre</th>
                     <th>Média</th>
                     <th>Situação</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
 
@@ -135,12 +136,15 @@
     - `modalOverlay` é um overlay central que mostra mensagens de sucesso/erro
     - Só pode ser fechado pelo usuário clicando em OK (comportamento definido em JS)
 -->
-<div id="modalOverlay" class="modal-overlay hidden">
+<div id="modalOverlay" class="modal-overlay hidden" tabindex="-1">
     <div class="modal-content">
         <div id="modalIcon" class="modal-icon"></div>
         <h2 id="modalTitulo"></h2>
         <p id="modalMensagem"></p>
-        <button id="botaoOk" class="btn-ok">OK</button>
+        <div class="modal-buttons">
+            <button id="botaoCancelar" type="button" class="btn-cancelar">Cancelar</button>
+            <button id="botaoOk" type="button" class="btn-ok">OK</button>
+        </div>
     </div>
 </div>
 

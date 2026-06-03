@@ -218,47 +218,201 @@ body{
 }
 
 .modal-content{
-    background: #ffffff;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
     border-radius: 24px;
-    padding: 40px;
-    box-shadow: 0 20px 80px rgba(15, 23, 42, 0.2);
+    padding: 44px;
+    border: 1.5px solid rgba(37, 99, 235, 0.15);
+    box-shadow: 0 25px 70px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.5);
     text-align: center;
-    max-width: 450px;
+    max-width: 480px;
     animation: popIn 0.3s ease-out;
 }
 
 .modal-icon{
-    font-size: 48px;
-    margin-bottom: 16px;
+    font-size: 64px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.modal-content.modal-sucesso .modal-icon{
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+    color: #10b981;
+}
+
+.modal-content.modal-confirmacao .modal-icon{
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+    color: #f59e0b;
+}
+
+.modal-content.modal-erro .modal-icon{
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+    color: #ef4444;
 }
 
 .modal-content h2{
-    color: #0f172a;
-    font-size: 24px;
-    margin-bottom: 12px;
+    color: #1e3a8a;
+    font-size: 28px;
+    margin-bottom: 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
 }
 
 .modal-content p{
-    color: #475569;
+    color: #52596f;
     font-size: 16px;
-    line-height: 1.6;
-    margin-bottom: 28px;
+    line-height: 1.7;
+    margin-bottom: 32px;
+    font-weight: 500;
+}
+
+.modal-content.modal-sucesso{
+    border-color: rgba(16, 185, 129, 0.25);
+    background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.modal-content.modal-sucesso h2{
+    color: #059669;
+}
+
+.modal-content.modal-confirmacao{
+    border-color: rgba(245, 158, 11, 0.25);
+    background: linear-gradient(180deg, #ffffff 0%, #fffbf0 100%);
+}
+
+.modal-content.modal-confirmacao h2{
+    color: #d97706;
+}
+
+.modal-content.modal-erro{
+    border-color: rgba(239, 68, 68, 0.25);
+    background: linear-gradient(180deg, #ffffff 0%, #fef2f2 100%);
+}
+
+.modal-content.modal-erro h2{
+    color: #dc2626;
 }
 
 .btn-ok{
-    background: #1e40af;
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
     color: white;
     border: none;
-    padding: 14px 32px;
-    border-radius: 12px;
-    font-size: 1rem;
+    padding: 13px 36px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(30, 64, 175, 0.3);
+}
+
+.btn-ok:hover{
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(30, 64, 175, 0.4);
+}
+
+.modal-content.modal-sucesso .btn-ok{
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.modal-content.modal-sucesso .btn-ok:hover{
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+}
+
+.modal-content.modal-confirmacao .btn-ok{
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+}
+
+.modal-content.modal-confirmacao .btn-ok:hover{
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+}
+
+.modal-content.modal-erro .btn-ok{
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+.modal-content.modal-erro .btn-ok:hover{
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+}
+
+.modal-content.modal-sucesso .btn-ok:hover{
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+}
+
+.modal-content.modal-confirmacao .btn-ok{
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+}
+
+.modal-content.modal-confirmacao .btn-ok:hover{
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+}
+
+.modal-content.modal-erro .btn-ok{
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.modal-content.modal-erro .btn-ok:hover{
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
+}
+
+.modal-buttons{
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+}
+
+.btn-cancelar{
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    padding: 12px 32px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.btn-cancelar:hover{
+    background: #e5e7eb;
+    border-color: rgba(148, 163, 184, 0.32);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-excluir{
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
     transition: background 0.25s ease, transform 0.25s ease;
 }
 
-.btn-ok:hover{
-    background: #2563eb;
+.btn-excluir:hover{
+    background: #b91c1c;
     transform: translateY(-1px);
 }
 
