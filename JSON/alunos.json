@@ -1,0 +1,38 @@
+[
+    {
+        "nome": "João Silva",
+        "curso": "ANÁLISE E DESENVOLVIMENTO DE SISTEMAS",
+        "semestre": 3,
+        "dataNascimento": "2002-05-10",
+        "nota1": 8,
+        "nota2": 7
+    },
+
+    {
+        "nome": "Maria Souza",
+        "curso": "ENGENHARIA DE SOFTWARE",
+        "semestre": 2,
+        "dataNascimento": "2003-08-20",
+        "nota1": 5,
+        "nota2": 4
+    },
+
+    {
+        "nome": "Pedro Lima",
+        "curso": "ANÁLISE E DESENVOLVIMENTO DE SISTEMAS",
+        "semestre": 1,
+        "dataNascimento": "2004-02-15",
+        "nota1": 2,
+        "nota2": 3
+    },
+    
+    {
+        "nome": "Ana Costa",
+        "curso": "NUTRIÇÃO",
+        "semestre": 4,
+        "dataNascimento": "2001-11-30",
+        "nota1": 9,
+        "nota2": 10
+    }
+
+]

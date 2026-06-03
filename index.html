@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Acadêmico Web</title>
+
+    <link rel="stylesheet" href="CSS/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- MENU LATERAL -->
+    <aside class="side-bar">
+
+        <div class="logo">
+            <h2>Portal Acadêmico</h2>
+        </div>
+
+        <nav class="side-bar-menu">
+            <ul>
+                <li><a href="#">Início</a></li>
+                <li><a href="#">Cadastro de Alunos</a></li>
+                <li><a href="#">Notas</a></li>
+                <li><a href="#">Relatórios</a></li>
+                <li><a href="#">Sobre</a></li>
+            </ul>
+        </nav>
+
+    </aside>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+ <main class="content">
+
+    <header class="header">
+        <h1>Portal Acadêmico Web</h1>
+        <p>Sistema de Gerenciamento Acadêmico</p>
+    </header>
+
+    <section class="welcome-card">
+        <h2>Bem-vindo!</h2>
+        <p>
+            Este sistema permite o gerenciamento de alunos,
+            lançamento de notas, emissão de relatórios e
+            acompanhamento do desempenho acadêmico.
+        </p>
+    </section>
+
+    <section class="table-card">
+        <h2>Alunos Cadastrados</h2>
+
+        <table id="tabelaAlunos">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Curso</th>
+                    <th>Semestre</th>
+                    <th>Média</th>
+                    <th>Situação</th>
+                </tr>
+            </thead>
+
+            <tbody id="corpoTabela"></tbody>
+        </table>
+    </section>
+
+</main>
+</div>
+
+<script src="JS/script.js"></script>
+
+</body>
+</html>
