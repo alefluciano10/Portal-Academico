@@ -103,6 +103,25 @@
         </form>
     </section>
 
+    <section class="table-card hidden" id="notasSection">
+
+    <h2>Lançamento de Notas</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Curso</th>
+                <th>Semestre</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+
+        <tbody id="corpoTabelaNotas"></tbody>
+    </table>
+
+</section>
+
     <!--
         TABELA DINÂMICA: mostra os alunos carregados do servidor/localStorage.
         - `id="corpoTabela"` é o <tbody> onde linhas são inseridas dinamicamente
@@ -115,10 +134,10 @@
         <table id="tabelaAlunos">
             <thead>
                 <tr>
-                    <th>Nome</th>
-                    <th>Curso</th>
-                    <th>Semestre</th>
-                    <th>Média</th>
+                    <th data-coluna="nome">Nome</th>
+                    <th data-coluna="curso">Curso</th>
+                    <th data-coluna="semestre">Semestre</th>
+                    <th data-coluna="media">Média</th>
                     <th>Situação</th>
                     <th>Ações</th>
                 </tr>

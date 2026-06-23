@@ -387,6 +387,22 @@ td{
     font-size: 0.96rem;
 }
 
+th[data-coluna]{
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+th[data-coluna]:hover{
+    background-color: #2745a5;
+}
+
+th[data-coluna]::after{
+    content: " ↕";
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
 tbody tr:nth-child(odd){
     background: #f8fafc;
 }

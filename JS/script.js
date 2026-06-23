@@ -16,14 +16,18 @@
 // Executa o script somente quando a página estiver totalmente carregada
 document.addEventListener("DOMContentLoaded", () => {
     const tabelaBody = document.getElementById("corpoTabela");
+    const tabelaNotas = document.getElementById("corpoTabelaNotas");
     const formCadastro = document.getElementById("formCadastro");
     const cadastroSection = document.getElementById("cadastroSection");
     const inicioSection = document.getElementById("inicioSection");
     const tabelaSection = document.getElementById("tabelaSection");
+    const notasSection = document.getElementById("notasSection");
     const menuLinks = document.querySelectorAll(".side-bar-menu a");
     const apiUrl = "http://localhost:3000/api";
     const storageKey = "alunosCadastro";
     let alunos = [];
+
+    let ordemAtual = {};
 
     let indiceEdicao = null;
     const botaoSubmit = formCadastro.querySelector(".btn-primary");
@@ -135,6 +139,62 @@ document.addEventListener("DOMContentLoaded", () => {
         return td;
     };
 
+    // TABELA DE NOTAS 
+    const carregarTabelaNotas = () => {
+
+    tabelaNotas.innerHTML = "";
+
+    alunos.forEach((aluno, indice) => {
+
+        const tr = document.createElement("tr");
+
+        tr.appendChild(criarCelula(aluno.nome));
+        tr.appendChild(criarCelula(aluno.curso));
+        tr.appendChild(criarCelula(aluno.semestre));
+
+        const tdAcao = document.createElement("td");
+
+        const botaoNotas =
+            document.createElement("button");
+
+        botaoNotas.textContent = "Notas";
+        botaoNotas.className = "btn-editar";
+
+        botaoNotas.addEventListener("click", () => {
+
+            const nota1 = prompt(
+                "Digite a Nota 1:",
+                aluno.nota1 || ""
+            );
+
+            const nota2 = prompt(
+                "Digite a Nota 2:",
+                aluno.nota2 || ""
+            );
+
+            aluno.nota1 = Number(nota1);
+            aluno.nota2 = Number(nota2);
+
+            salvarAlunos();
+
+            carregarTabela(alunos);
+
+            carregarTabelaNotas();
+
+            mostrarModal({
+                titulo: "Sucesso",
+                mensagem: "Notas atualizadas!"
+            });
+        });
+
+        tdAcao.appendChild(botaoNotas);
+
+        tr.appendChild(tdAcao);
+
+        tabelaNotas.appendChild(tr);
+    });
+};
+
     const criarLinhaAluno = (aluno, indice) => {
         const tr = document.createElement("tr");
 
@@ -190,6 +250,41 @@ document.addEventListener("DOMContentLoaded", () => {
         return tr;
     };
 
+    // NOTAS
+
+    const ordenarTabela = (coluna) => {
+
+    const crescente = !ordemAtual[coluna];
+
+    ordemAtual[coluna] = crescente;
+
+    alunos.sort((a, b) => {
+
+        let valorA;
+        let valorB;
+
+        if (coluna === "media") {
+            valorA = Number(calcularMedia(a.nota1, a.nota2)) || 0;
+            valorB = Number(calcularMedia(b.nota1, b.nota2)) || 0;
+        } else {
+            valorA = a[coluna];
+            valorB = b[coluna];
+        }
+
+        if (typeof valorA === "string") {
+            return crescente
+                ? valorA.localeCompare(valorB)
+                : valorB.localeCompare(valorA);
+        }
+
+        return crescente
+            ? valorA - valorB
+            : valorB - valorA;
+    });
+
+    carregarTabela(alunos);
+};
+
     const limparTabela = () => {
         tabelaBody.innerHTML = "";
     };
@@ -233,38 +328,50 @@ document.addEventListener("DOMContentLoaded", () => {
         return dados ? JSON.parse(dados) : null;
     };
 
-    const mostrarSecao = (secao) => {
-        const activeClass = "active";
-        menuLinks.forEach((link) => {
-            if (link.dataset.target === secao) {
-                link.classList.add(activeClass);
-            } else {
-                link.classList.remove(activeClass);
-            }
-        });
-
-        if (secao === "cadastro") {
-            cadastroSection.classList.remove("hidden");
-            inicioSection.classList.add("hidden");
-            tabelaSection.classList.add("hidden");
-        } else {
-            cadastroSection.classList.add("hidden");
-            inicioSection.classList.remove("hidden");
-            tabelaSection.classList.remove("hidden");
-        }
-    };
+const mostrarSecao = (secao) => {
 
     menuLinks.forEach((link) => {
-        link.addEventListener("click", (event) => {
-            event.preventDefault();
-            const target = link.dataset.target;
-            if (target === "cadastro") {
-                mostrarSecao("cadastro");
-            } else {
-                mostrarSecao("inicio");
-            }
-        });
+
+        link.classList.toggle(
+            "active",
+            link.dataset.target === secao
+        );
+
     });
+
+    cadastroSection.classList.add("hidden");
+    inicioSection.classList.add("hidden");
+    tabelaSection.classList.add("hidden");
+    notasSection.classList.add("hidden");
+
+    if (secao === "cadastro") {
+
+        cadastroSection.classList.remove("hidden");
+
+    } else if (secao === "notas") {
+
+         notasSection.classList.remove("hidden");
+        carregarTabelaNotas();
+
+    } else {
+
+        inicioSection.classList.remove("hidden");
+        tabelaSection.classList.remove("hidden");
+
+    }
+};
+
+menuLinks.forEach((link) => {
+
+    link.addEventListener("click", (event) => {
+
+        event.preventDefault();
+
+        mostrarSecao(link.dataset.target);
+
+    });
+
+});
 
     // Carrega dados iniciais ao abrir a página
     // 1) Tenta buscar do servidor (`/api/alunos`) — modo preferencial
@@ -362,6 +469,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 document.getElementById("nome").focus();
             }
+        });
+    });
+
+    document
+    .querySelectorAll("th[data-coluna]")
+    .forEach(th => {
+
+        th.style.cursor = "pointer";
+
+        th.addEventListener("click", () => {
+
+            const coluna = th.dataset.coluna;
+
+            ordenarTabela(coluna);
         });
     });
 

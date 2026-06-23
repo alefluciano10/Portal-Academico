@@ -2,7 +2,13 @@
     {
         "nome": "Alef Luciano",
         "curso": "ADMINISTRAÇÃO",
-        "semestre": 5,
+        "semestre": 2,
         "dataNascimento": "2003-12-09"
+    },
+    {
+        "nome": "Ana Silva",
+        "curso": "MATEMÁTICA",
+        "semestre": 5,
+        "dataNascimento": "1999-02-11"
     }
 ]
